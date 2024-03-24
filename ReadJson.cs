@@ -3,7 +3,7 @@ using System.Text.Json;
 public class ReadJson
 {
 
-    public static List<T> ReadFile<T>(string filepath, List<T> informationList)
+    public static List<T> ReadFile<T>(string filepath)
     {
         List<T>? data = new List<T>();
         
@@ -15,11 +15,10 @@ public class ReadJson
 
         if (data == null)
         {
-            return informationList;
+            return new List<T>();
         }
 
-        informationList.AddRange(data);
-        return informationList;
+        return data;
     }
 
 }
