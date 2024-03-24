@@ -1,17 +1,17 @@
 ﻿using System.Text.Json;
 
+const string REMINDERS_FILEPATH = "reminders.json";
 List<DayOfWeek> allowed_days_of_week = new List<DayOfWeek>(){DayOfWeek.Monday, DayOfWeek.Friday};
-List<Reminder> reminders = new List<Reminder>();
 
 bool ShouldSendReminders() 
 {
     return allowed_days_of_week.Contains(DateTime.Today.DayOfWeek);
 }
 
-void SaveToJsonFile(List<Reminder> reminders)
+void SaveToJsonFile(List<Reminder> reminders, string filepath)
 {
     string jsonData = JsonSerializer.Serialize(reminders);
-    File.WriteAllText("./reminders.json", jsonData);
+    File.WriteAllText($"./{filepath}", jsonData);
 }
 
 string TreatedStringInput(string message, bool checkIfRight=true)
@@ -22,10 +22,9 @@ string TreatedStringInput(string message, bool checkIfRight=true)
         Console.Write(message);
         string? input = Console.ReadLine();
 
-        Console.Write($"Is {input} right? [Y/n]\n>");
-
         if (checkIfRight)
         {
+            Console.Write($"Is {input} right? [Y/n]\n>");
             isRight = Console.ReadLine();
         }
 
@@ -42,13 +41,27 @@ string TreatedStringInput(string message, bool checkIfRight=true)
     }
 }
 
+int TreatedIntInput(string message, bool checkIfRight=true)
+{
+    while(true) {
+        try 
+        {
+            return Int32.Parse(TreatedStringInput(message, checkIfRight));
+        } 
+        catch (System.FormatException)
+        {
+            Console.WriteLine("Invalid number");
+        }
+    }
+}
+
 DateTime TreatedDateInput()
 {
     while (true) 
     {
-        int year = Int32.Parse(TreatedStringInput("What's the year? \n>"));
-        int month = Int32.Parse(TreatedStringInput("What's the month(number)?\n>"));
-        int day = Int32.Parse(TreatedStringInput("What's the day?\n>"));
+        int year = TreatedIntInput("What's the year\n>");
+        int month = TreatedIntInput("What's the month(number)?\n>");
+        int day = TreatedIntInput("What's the day?\n>");
 
         try 
         {
@@ -84,10 +97,57 @@ List<Reminder> CreateNewReminders()
 
     }
     
-
     return reminders;
 }
 
-//Console.WriteLine(CreateNewReminders()[0]);
-Console.WriteLine(ReadJson.ReadFile("test.json", new List<Reminder>()));
+void Main()
+{
+    while (true)
+    {
+        List<Reminder> reminders = ReadJson.ReadFile<Reminder>(REMINDERS_FILEPATH);
+        string opcoes = "[ 0 ] Show reminders \n[ 1 ] Create new reminder(s) \n[ 2 ] Delete reminder \n[ 3 ] Edit reminder \n[ 4 ] Save reminders \n[5] Send reminders \n[ 6 ] Exit";
+        Console.WriteLine(opcoes);
+        int chosenOption = TreatedIntInput("> ", false);
+
+        switch (chosenOption)
+        {
+            case 0:
+                foreach (Reminder reminder in reminders)
+                {
+                    Console.WriteLine(reminder.FormatReminder());
+                }
+                break;
+
+            case 1:
+                reminders.AddRange(CreateNewReminders());
+                break;
+
+            case 2:
+                // TODO: functionality to Delete
+                break;
+
+            case 3:
+                // TODO: functionality to Edit
+                break;
+
+            case 4:
+                SaveToJsonFile(reminders, REMINDERS_FILEPATH);
+                break;
+
+            case 5:
+                // TODO: functionality send through email
+                break;
+
+            case 6:
+                Console.WriteLine("Terminating the program.");
+                return;
+
+            default:
+                Console.WriteLine("Invalid option!");
+                break;
+        }
+    }
+}
+ 
+Main();
 
